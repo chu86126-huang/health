@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活力健康運動日誌</title>
+    <style>
+        :root {
+            --primary-color: #ff7e5f;
+            --secondary-color: #feb47b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 2rem;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* 運動計時器樣式 */
+        .timer-container {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .timer-btn {
+            background-color: #f1f2f6;
+            border: 1px solid #dcdde1;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .timer-btn:hover {
+            background-color: #e4e7eb;
+        }
+
+        .timer-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .timer-btn.primary:hover {
+            opacity: 0.9;
+        }
+
+        /* 新增影片表單區塊 */
+        .add-video-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-video-form input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .add-video-form button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+
+        .add-video-form button:hover {
+            opacity: 0.9;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .video-item {
+            background: #fafafa;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eaeaea;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 手繪風封面容器 */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 比例 */
+            background-color: #fceade;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .hand-drawn-poster {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, #fff3ee 0%, #fde4dc 100%);
+            border: 3px dashed #ffb088;
+            box-sizing: border-box;
+            transition: background 0.3s;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .video-container:hover .hand-drawn-poster {
+            background: radial-gradient(circle, #ffece4 0%, #fcd2c5 100%);
+        }
+
+        .hand-drawn-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+            filter: drop-shadow(2px 2px 0px rgba(255,255,255,0.8));
+        }
+
+        .hand-drawn-title {
+            font-family: "Comic Sans MS", "Chalkboard SE", "Microsoft JhengHei", sans-serif;
+            font-weight: bold;
+            color: #b35432;
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .play-badge {
+            background-color: #ff7e5f;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(255,126,95,0.3);
+            transition: transform 0.2s;
+        }
+
+        .video-container:hover .play-badge {
+            transform: scale(1.05);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        .video-info {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #fff;
+        }
+
+        .video-info-text h3 {
+            font-size: 0.95rem;
+            margin: 0 0 5px 0;
+            color: #333;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .delete-btn {
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #d9363e;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            font-size: 0.85rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🌟 活力健康運動日誌</h1>
+            <p>隨時隨地活絡筋骨、鍛鍊身體的好幫手！</p>
+        </header>
+
+        <!-- 運動計時器專區 -->
+        <div class="card">
+            <h2>⏱️ 運動計時器</h2>
+            <div class="timer-container">
+                <div class="timer-display" id="timerDisplay">10:00</div>
+                <div class="timer-controls">
+                    <button class="timer-btn primary" onclick="startTimer()">開始</button>
+                    <button class="timer-btn" onclick="pauseTimer()">暫停</button>
+                    <button class="timer-btn" onclick="resetTimer(600)">重設 10 分鐘</button>
+                    <button class="timer-btn" onclick="resetTimer(180)">重設 3 分鐘</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 影片推薦與管理區塊 -->
+        <div class="card">
+            <h2>🎥 運動影片清單管理</h2>
+            
+            <!-- 新增影片表單 -->
+            <div class="add-video-form">
+                <input type="text" id="videoUrl" placeholder="貼上 YouTube 連結 (例如：https://www.youtube.com/watch?v=...)">
+                <button onclick="addVideo()">新增影片</button>
+            </div>
+
+            <!-- 影片網格 -->
+            <div class="video-grid" id="videoGrid">
+                <!-- 動態載入影片項目 -->
+            </div>
+        </div>
+
+        <footer>
+            <p>祝你有個充滿活力與美好的一天！ 💪✨</p>
+        </footer>
+    </div>
+
+    <script>
+        // ── 運動計時器邏輯 ──
+        let countdownTime = 600;
+        let timerInterval = null;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(countdownTime / 60);
+            const seconds = countdownTime % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            if (countdownTime <= 0) return;
+            
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                if (countdownTime > 0) {
+                    countdownTime--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    alert('⏰ 時間到！今天的運動圓滿完成！');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer(seconds) {
+            pauseTimer();
+            countdownTime = seconds;
+            updateTimerDisplay();
+        }
+
+        // ── 影片管理邏輯 ──
+        const defaultVideos = [
+            {
+                id: '2fGQ0W-RKfI',
+                title: '李鳳山師父平甩功十分鐘練習【梅門官方】',
+                icon: '🧘‍♂️'
+            },
+            {
+                id: 'qORSDlIs7IY',
+                title: '早晨 3 分鐘高效燃脂拉伸',
+                icon: '☀️'
+            }
+        ];
+
+        let videos = JSON.parse(localStorage.getItem('health_videos')) || defaultVideos;
+
+        function extractYouTubeId(urlOrId) {
+            if (!urlOrId) return '';
+            if (urlOrId.length === 11 && !urlOrId.includes('/') && !urlOrId.includes('.')) {
+                return urlOrId;
+            }
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = urlOrId.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : urlOrId;
+        }
+
+        function renderVideos() {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = '';
+
+            videos.forEach((video, index) => {
+                const videoId = extractYouTubeId(video.id);
+                const icon = video.icon || '🌸';
+                const item = document.createElement('div');
+                item.className = 'video-item';
+                // 使用跨裝置通用的嵌入網址結構
+                item.innerHTML = `
+                    <div class="video-container" onclick="playVideo(this, '${videoId}')">
+                        <div class="hand-drawn-poster">
+                            <div class="hand-drawn-icon">${icon}</div>
+                            <div class="hand-drawn-title">${video.title}</div>
+                            <div class="play-badge">▶ 點擊開始播放</div>
+                        </div>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-info-text">
+                            <h3>${video.title}</h3>
+                        </div>
+                        <button class="delete-btn" onclick="deleteVideo(event, ${index})">刪除</button>
+                    </div>
+                `;
+                grid.appendChild(item);
+            });
+
+            localStorage.setItem('health_videos', JSON.stringify(videos));
+        }
+
+        function playVideo(container, videoId) {
+            container.innerHTML = `
+                <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1" title="YouTube video player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            `;
+        }
+
+        function addVideo() {
+            const urlInput = document.getElementById('videoUrl');
+            const rawUrl = urlInput.value.trim();
+
+            if (!rawUrl) {
+                alert('請貼上 YouTube 網址！');
+                return;
+            }
+
+            const videoId = extractYouTubeId(rawUrl);
+            if (!videoId || videoId.length !== 11) {
+                alert('無法辨識此 YouTube 網址，請確認後重試！');
+                return;
+            }
+
+            // 模擬產生類似原始影片標題的名稱與風格圖示
+            const titles = [
+                `活力健身與經絡伸展練習 (ID: ${videoId.slice(-4)})`,
+                `全身舒展與健康操練習 (${videoId})`,
+                `日常核心與舒緩運動 (${videoId.slice(0, 3)})`
+            ];
+            const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+            
+            const randomIcons = ['🌿', '🧘‍♀️', '💪', '☀️', '🌸', '🍵', '🔥'];
+            const randomIcon = randomIcons[Math.floor(Math.random() * randomIcons.length)];
+
+            videos.push({ id: videoId, title: randomTitle, icon: randomIcon });
+            
+            urlInput.value = '';
+            renderVideos();
+        }
+
+        function deleteVideo(event, index) {
+            event.stopPropagation();
+            if (confirm('確定要刪除這個影片嗎？')) {
+                videos.splice(index, 1);
+                renderVideos();
+            }
+        }
+
+        // 初始化
+        renderVideos();
+        updateTimerDisplay();
+    </script>
+
+</body>
+</html>
